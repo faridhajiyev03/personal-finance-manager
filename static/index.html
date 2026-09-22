@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Finance Manager</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="/">Finance Manager<span>EUR</span></a>
+
+    <div id="user-menu" hidden>
+      <span id="user-email"></span>
+      <button id="logout-button" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <p id="message" role="status" aria-live="polite" hidden></p>
+
+    <!-- LOGIN / REGISTER -->
+    <section id="auth-section" class="auth-card">
+      <p class="eyebrow">YOUR MONEY, IN ONE PLACE</p>
+      <h1>Make sense of your finances.</h1>
+      <p>Track your income and expenses in euros.</p>
+
+      <div class="tabs" role="group" aria-label="Account action">
+        <button
+          id="login-tab"
+          type="button"
+          class="active"
+          aria-pressed="true"
+        >
+          Log in
+        </button>
+
+        <button
+          id="register-tab"
+          type="button"
+          aria-pressed="false"
+        >
+          Create account
+        </button>
+      </div>
+
+      <form id="auth-form">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="username"
+          maxlength="254"
+          required
+        >
+
+        <label for="password">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          minlength="1"
+          maxlength="128"
+          required
+        >
+
+        <button id="auth-submit" class="primary" type="submit">
+          Log in
+        </button>
+      </form>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard-section" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">PERSONAL FINANCE</p>
+          <h1>Overview</h1>
+          <p>All amounts are in EUR.</p>
+        </div>
+      </div>
+
+      <form id="period-form" class="filters">
+        <div>
+          <label for="date-from">From</label>
+          <input id="date-from" type="date">
+        </div>
+
+        <div>
+          <label for="date-to">To</label>
+          <input id="date-to" type="date">
+        </div>
+
+        <button class="primary" type="submit">Apply period</button>
+        <button id="reset-period" type="button">All time</button>
+      </form>
+
+      <div class="summary-grid">
+        <article class="summary-card">
+          <h2>Income</h2>
+          <p id="income-value">—</p>
+        </article>
+
+        <article class="summary-card">
+          <h2>Expenses</h2>
+          <p id="expense-value">—</p>
+        </article>
+
+        <article class="summary-card">
+          <h2>Net income</h2>
+          <p id="balance-value">—</p>
+          <small>Income minus expenses for the selected period</small>
+        </article>
+      </div>
+
+      <div class="workspace">
+        <!-- CREATE / EDIT -->
+        <section class="panel">
+          <h2 id="transaction-form-title">Add transaction</h2>
+
+          <form id="transaction-form">
+            <label for="transaction-type">Type</label>
+            <select id="transaction-type" required>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+            </select>
+
+            <label for="transaction-amount">Amount (€)</label>
+            <input
+              id="transaction-amount"
+              type="number"
+              min="0.01"
+              max="9999999999.99"
+              step="0.01"
+              placeholder="0.00"
+              required
+            >
+
+            <label for="transaction-category">Category</label>
+            <input
+              id="transaction-category"
+              type="text"
+              maxlength="50"
+              list="category-suggestions"
+              placeholder="For example, Food"
+              required
+            >
+
+            <datalist id="category-suggestions">
+              <option value="Food"></option>
+              <option value="Transport"></option>
+              <option value="Housing"></option>
+              <option value="Health"></option>
+              <option value="Entertainment"></option>
+              <option value="Shopping"></option>
+              <option value="Salary"></option>
+              <option value="Other"></option>
+            </datalist>
+
+            <label for="transaction-date">Date</label>
+            <input id="transaction-date" type="date" required>
+
+            <label for="transaction-description">
+              Description (optional)
+            </label>
+            <textarea
+              id="transaction-description"
+              maxlength="500"
+              rows="3"
+              placeholder="Add a note"
+            ></textarea>
+
+            <button
+              id="transaction-submit"
+              class="primary"
+              type="submit"
+            >
+              Add transaction
+            </button>
+
+            <button id="cancel-edit" type="button" hidden>
+              Cancel editing
+            </button>
+          </form>
+        </section>
+
+        <!-- LIST -->
+        <section class="panel transactions-panel">
+          <h2>Transactions</h2>
+
+          <form id="list-filter-form" class="filters">
+            <div>
+              <label for="filter-type">Type</label>
+              <select id="filter-type">
+                <option value="">All types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="filter-category">Category</label>
+              <input
+                id="filter-category"
+                type="text"
+                maxlength="50"
+                placeholder="Exact category"
+              >
+            </div>
+
+            <button type="submit">Filter list</button>
+            <button id="reset-list-filters" type="button">Reset</button>
+          </form>
+
+          <p class="muted">
+            Type and category filters apply only to the list.
+          </p>
+
+          <p id="list-status" role="status" hidden></p>
+
+          <div class="table-wrapper">
+            <table>
+              <caption class="sr-only">Your transactions</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactions-body"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <button id="previous-page" type="button" disabled>
+              Previous
+            </button>
+
+            <span id="page-label">Page 1</span>
+
+            <button id="next-page" type="button" disabled>
+              Next
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
