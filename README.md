@@ -4,6 +4,15 @@ A full-stack application for tracking personal income and expenses in EUR.
 
 Built with FastAPI, PostgreSQL and vanilla JavaScript.
 
+## Live Demo
+
+[Open Personal Finance Manager](https://personal-finance-manager-vkfz.onrender.com)
+
+Create an account to explore the app with sample transactions.
+The first request may take about a minute while the free server wakes up.
+
+Hosted on Render with PostgreSQL on Neon.
+
 ## Features
 
 - Account registration and login with JWT authentication
@@ -156,5 +165,5 @@ Automated tests have not been added yet.
 
 ## Current Scope
 
-This is a local portfolio MVP. It does not yet include deployment,
+This is a deployed portfolio MVP. It does not yet include automated tests,
 password recovery, refresh tokens, bank integrations or currency conversion.
