@@ -66,7 +66,7 @@ def list_transactions(
     date_to: date | None = None,
     limit: int = 50,
     offset: int = 0,
-) -> list[Transaction]:
+) -> tuple[list[Transaction], int]:
     stmt = select(Transaction).where(
         Transaction.user_id == current_user_id
     )
@@ -83,6 +83,8 @@ def list_transactions(
     if date_to is not None:
         stmt = stmt.where(Transaction.date <= date_to)
 
+    total = db.scalar(select(func.count()).select_from(stmt.subquery()))
+
     stmt = (
         stmt
         .order_by(Transaction.date.desc(), Transaction.id.desc())
@@ -90,7 +92,7 @@ def list_transactions(
         .offset(offset)
     )
 
-    return list(db.execute(stmt).scalars().all())
+    return list(db.execute(stmt).scalars().all()), total
 
 
 def update_transaction(

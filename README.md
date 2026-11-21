@@ -15,6 +15,12 @@ The first request may take about a minute while the free server wakes up.
 
 Hosted on Render with PostgreSQL on Neon.
 
+## Screenshots
+
+![Dashboard with summary and transactions](docs/screenshots/dashboard.png)
+
+![Sign in page](docs/screenshots/sign-in.png)
+
 ## Features
 
 - Account registration and login with JWT authentication
@@ -51,6 +57,7 @@ app/
 ├── services/
 └── routers/
 alembic/
+docs/
 tests/
 static/
 ├── index.html
@@ -139,6 +146,16 @@ Transaction endpoints require a Bearer token.
 
 The list endpoint supports `type`, `category`, `date_from`,
 `date_to`, `limit` and `offset`.
+It returns a page together with the total number of matches:
+
+```json
+{
+  "items": [{"id": 1, "type": "expense", "amount": "42.50", "category": "Food", "date": "2026-11-01", "description": null, "currency": "EUR"}],
+  "total": 37,
+  "limit": 20,
+  "offset": 0
+}
+```
 
 The summary endpoint supports `date_from` and `date_to`.
 Date boundaries are inclusive.

@@ -138,7 +138,7 @@ def test_list_is_sorted_newest_first(client, account, add_transaction):
     response = client.get("/transactions", headers=headers)
 
     assert response.status_code == 200
-    assert [t["category"] for t in response.json()] == ["New", "Middle", "Old"]
+    assert [t["category"] for t in response.json()["items"]] == ["New", "Middle", "Old"]
 
 
 def test_list_filters(client, account, add_transaction):
@@ -151,7 +151,7 @@ def test_list_filters(client, account, add_transaction):
     def categories(**params):
         response = client.get("/transactions", params=params, headers=headers)
         assert response.status_code == 200, response.text
-        return sorted(t["category"] for t in response.json())
+        return sorted(t["category"] for t in response.json()["items"])
 
     assert categories(type="income") == ["Salary"]
     assert categories(category="Food") == ["Food", "Food"]
@@ -168,7 +168,25 @@ def test_pagination(client, account, add_transaction):
         "/transactions", params={"limit": 2, "offset": 1}, headers=headers
     )
 
-    assert [t["category"] for t in response.json()] == ["Day 4", "Day 3"]
+    body = response.json()
+    assert [t["category"] for t in body["items"]] == ["Day 4", "Day 3"]
+    assert body["total"] == 5
+    assert body["limit"] == 2
+    assert body["offset"] == 1
+
+
+def test_total_counts_only_matching_transactions(client, account, add_transaction):
+    _, headers = account()
+    add_transaction(headers, category="Food")
+    add_transaction(headers, category="Food")
+    add_transaction(headers, category="Rent")
+
+    response = client.get(
+        "/transactions", params={"category": "Food", "limit": 1}, headers=headers
+    )
+
+    assert len(response.json()["items"]) == 1
+    assert response.json()["total"] == 2
 
 
 @pytest.mark.parametrize(
