@@ -1,5 +1,7 @@
 # Personal Finance Manager
 
+[![Backend Tests](https://github.com/faridhajiyev03/personal-finance-manager/actions/workflows/backend-tests.yml/badge.svg)](https://github.com/faridhajiyev03/personal-finance-manager/actions/workflows/backend-tests.yml)
+
 A full-stack application for tracking personal income and expenses in EUR.
 
 Built with FastAPI, PostgreSQL and vanilla JavaScript.
@@ -49,12 +51,14 @@ app/
 ├── services/
 └── routers/
 alembic/
+tests/
 static/
 ├── index.html
 ├── style.css
 └── app.js
 main.py
 requirements.txt
+requirements-test.txt
 .env.example
 ```
 
@@ -152,20 +156,34 @@ Date boundaries are inclusive.
 - Only the description can be cleared with null.
 - The browser stores the access token in sessionStorage.
 
-## Validation Status
+## Tests
 
-Manually checked through Swagger UI and the web interface:
+The tests call the API with FastAPI's `TestClient` against a separate
+PostgreSQL database. They cover:
 
-- Registration, login and authenticated user retrieval
-- Transaction creation, editing and deletion
-- Income and expense totals
-- Data isolation between two users
-- Rejection of access to another user's transactions
-- Missing transaction responses after deletion
+- Registration, login and token validation (expired, forged and malformed tokens)
+- Transaction validation, including amounts, types, dates and forbidden fields
+- Create, read, update and delete, including clearing the description with null
+- Filters, inclusive date ranges, sorting and pagination
+- Income, expense and net income summary
+- Data isolation: another user's transactions return 404 and stay unchanged
 
-Automated tests have not been added yet.
+Create a test database whose name ends with `_test`, then run:
+
+```bash
+python -m pip install -r requirements-test.txt
+export TEST_DATABASE_URL=postgresql+psycopg://YOUR_DB_USER:YOUR_DB_PASSWORD@localhost:5432/finance_manager_test
+python -m pytest -v
+```
+
+The test setup refuses any database whose name does not end with `_test`,
+so a real database is never wiped by mistake.
+
+GitHub Actions runs the tests on every push and pull request. It also
+applies all migrations to an empty database and checks that they match
+the models.
 
 ## Current Scope
 
-This is a deployed portfolio MVP. It does not yet include automated tests,
-password recovery, refresh tokens, bank integrations or currency conversion.
+This is a deployed portfolio MVP. It does not yet include password recovery,
+refresh tokens, bank integrations or currency conversion.
