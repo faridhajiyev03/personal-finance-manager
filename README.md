@@ -145,6 +145,8 @@ Date boundaries are inclusive.
 - Amounts are positive; transaction type determines income or expense.
 - Transaction ownership comes from the authenticated user.
 - Clients cannot assign or change a transaction's user ID.
+- Another user's transaction returns 404, so the API does not reveal
+  which transaction IDs exist.
 - List and summary queries are restricted to the current user.
 - PATCH distinguishes omitted fields from explicit null values.
 - Only the description can be cleared with null.

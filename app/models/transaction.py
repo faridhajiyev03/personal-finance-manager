@@ -47,7 +47,7 @@ class Transaction(Base):
         nullable=False,
     )
 
-    # Все суммы хранятся в EUR.
+    # All amounts are stored in EUR.
     amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2),
         nullable=False,

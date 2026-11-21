@@ -13,16 +13,14 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-
-from app.security import get_current_user
-from app.services import transactions as service
-
 from app.schemas.transaction import (
     TransactionCreate,
     TransactionResponse,
     TransactionSummary,
     TransactionUpdate,
 )
+from app.security import get_current_user
+from app.services import transactions as service
 
 
 router = APIRouter(
@@ -87,6 +85,7 @@ def list_transactions(
         offset=offset,
     )
 
+
 @router.get("/summary", response_model=TransactionSummary)
 def get_summary(
     date_from: date | None = None,
@@ -111,6 +110,7 @@ def get_summary(
         date_to=date_to,
     )
 
+
 @router.get(
     "/{transaction_id}",
     response_model=TransactionResponse,
@@ -130,11 +130,6 @@ def get_transaction(
         raise HTTPException(
             status_code=404,
             detail="Transaction not found",
-        )
-    except service.TransactionPermissionError:
-        raise HTTPException(
-            status_code=403,
-            detail="You cannot access this transaction",
         )
 
 
@@ -160,11 +155,6 @@ def update_transaction(
             status_code=404,
             detail="Transaction not found",
         )
-    except service.TransactionPermissionError:
-        raise HTTPException(
-            status_code=403,
-            detail="You cannot edit this transaction",
-        )
 
 
 @router.delete("/{transaction_id}", status_code=204)
@@ -183,11 +173,6 @@ def delete_transaction(
         raise HTTPException(
             status_code=404,
             detail="Transaction not found",
-        )
-    except service.TransactionPermissionError:
-        raise HTTPException(
-            status_code=403,
-            detail="You cannot delete this transaction",
         )
 
     return Response(status_code=204)
