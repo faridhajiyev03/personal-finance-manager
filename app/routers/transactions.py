@@ -15,6 +15,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.transaction import (
     TransactionCreate,
+    TransactionList,
     TransactionResponse,
     TransactionSummary,
     TransactionUpdate,
@@ -46,7 +47,7 @@ def create_transaction(
     )
 
 
-@router.get("", response_model=list[TransactionResponse])
+@router.get("", response_model=TransactionList)
 def list_transactions(
     transaction_type: Literal["income", "expense"] | None = Query(
         default=None,
@@ -74,7 +75,7 @@ def list_transactions(
             detail="date_from must not be later than date_to",
         )
 
-    return service.list_transactions(
+    items, total = service.list_transactions(
         db=db,
         current_user_id=current_user.id,
         transaction_type=transaction_type,
@@ -84,6 +85,13 @@ def list_transactions(
         limit=limit,
         offset=offset,
     )
+
+    return {
+        "items": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 @router.get("/summary", response_model=TransactionSummary)

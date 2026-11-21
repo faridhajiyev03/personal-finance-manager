@@ -83,6 +83,13 @@ class TransactionResponse(BaseModel):
     currency: Literal["EUR"] = "EUR"
 
 
+class TransactionList(BaseModel):
+    items: list[TransactionResponse]
+    total: int
+    limit: int
+    offset: int
+
+
 class TransactionSummary(BaseModel):
     income: Decimal
     expense: Decimal

@@ -39,6 +39,7 @@ def test_list_and_summary_show_only_own_transactions(
     listing = client.get("/transactions", headers=intruder)
     summary = client.get("/transactions/summary", headers=intruder)
 
-    assert [t["category"] for t in listing.json()] == ["Gift"]
+    assert [t["category"] for t in listing.json()["items"]] == ["Gift"]
+    assert listing.json()["total"] == 1
     assert summary.json()["income"] == "5.00"
     assert summary.json()["expense"] == "0.00"

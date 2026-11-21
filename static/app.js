@@ -12,6 +12,7 @@ const state = {
   transactions: [],
   page: 0,
   hasNext: false,
+  total: 0,
   dateFrom: "",
   dateTo: "",
   type: "",
@@ -105,6 +106,7 @@ function logout() {
   state.transactions = [];
   state.page = 0;
   state.hasNext = false;
+  state.total = 0;
   state.loading = false;
   state.dateFrom = "";
   state.dateTo = "";
@@ -202,7 +204,8 @@ function periodParams() {
 }
 
 function updatePagination() {
-  $("page-label").textContent = `Page ${state.page + 1}`;
+  const pageCount = Math.max(1, Math.ceil(state.total / PAGE_SIZE));
+  $("page-label").textContent = `Page ${state.page + 1} of ${pageCount}`;
 
   $("previous-page").disabled =
     state.loading || state.page === 0;
@@ -278,8 +281,7 @@ async function loadDashboard() {
   if (state.type) listParams.set("type", state.type);
   if (state.category) listParams.set("category", state.category);
 
-  // One additional record tells us whether a next page exists.
-  listParams.set("limit", String(PAGE_SIZE + 1));
+  listParams.set("limit", String(PAGE_SIZE));
   listParams.set("offset", String(state.page * PAGE_SIZE));
 
   state.loading = true;
@@ -290,14 +292,14 @@ async function loadDashboard() {
   updatePagination();
 
   try {
-    const [summary, transactions] = await Promise.all([
+    const [summary, page] = await Promise.all([
       api(`/transactions/summary?${summaryParams}`),
       api(`/transactions?${listParams}`),
     ]);
 
     if (requestId !== state.requestId) return;
 
-    if (transactions.length === 0 && state.page > 0) {
+    if (page.items.length === 0 && state.page > 0) {
       state.page -= 1;
       return await loadDashboard();
     }
@@ -306,14 +308,16 @@ async function loadDashboard() {
     $("expense-value").textContent = formatMoney(summary.expense);
     $("balance-value").textContent = formatMoney(summary.balance);
 
-    state.hasNext = transactions.length > PAGE_SIZE;
-    state.transactions = transactions.slice(0, PAGE_SIZE);
+    state.total = page.total;
+    state.hasNext = (state.page + 1) * PAGE_SIZE < page.total;
+    state.transactions = page.items;
 
     renderTransactions();
   } catch (error) {
     if (requestId !== state.requestId) return;
 
     state.hasNext = false;
+    state.total = 0;
     $("income-value").textContent = "—";
     $("expense-value").textContent = "—";
     $("balance-value").textContent = "—";
