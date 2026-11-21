@@ -82,6 +82,7 @@ class TransactionResponse(BaseModel):
     description: str | None
     currency: Literal["EUR"] = "EUR"
 
+
 class TransactionSummary(BaseModel):
     income: Decimal
     expense: Decimal

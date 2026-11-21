@@ -1,7 +1,8 @@
 from datetime import date
+from decimal import Decimal
 from typing import Literal
 
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -11,15 +12,8 @@ from app.schemas.transaction import (
     TransactionUpdate,
 )
 
-from decimal import Decimal
-from sqlalchemy import case, func
-
 
 class TransactionNotFoundError(Exception):
-    pass
-
-
-class TransactionPermissionError(Exception):
     pass
 
 
@@ -28,13 +22,16 @@ def get_transaction(
     db: Session,
     current_user_id: int,
 ) -> Transaction:
-    transaction = db.get(Transaction, transaction_id)
+    # Another user's transaction is reported as "not found" (not "forbidden"),
+    # so the API does not reveal which transaction IDs exist.
+    stmt = select(Transaction).where(
+        Transaction.id == transaction_id,
+        Transaction.user_id == current_user_id,
+    )
+    transaction = db.execute(stmt).scalars().first()
 
     if transaction is None:
         raise TransactionNotFoundError()
-
-    if transaction.user_id != current_user_id:
-        raise TransactionPermissionError()
 
     return transaction
 
@@ -140,6 +137,7 @@ def delete_transaction(
     except SQLAlchemyError:
         db.rollback()
         raise
+
 
 def get_summary(
     db: Session,

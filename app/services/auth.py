@@ -37,8 +37,8 @@ def register_user(data: UserCreate, db: Session) -> User:
     except IntegrityError:
         db.rollback()
 
-        # Другой запрос мог зарегистрировать этот email
-        # между нашей проверкой и сохранением.
+        # Another request may have registered this email
+        # between our check and the commit.
         if get_user_by_email(email, db) is not None:
             raise EmailAlreadyExistsError()
 
